@@ -161,7 +161,35 @@ func (c *RPCClient) GetBlock(hash string) (*Block, error) {
 		return nil, err
 	}
 	var b Block
-	return &b, json.Unmarshal(raw, &b)
+	if err := json.Unmarshal(raw, &b); err != nil {
+		return nil, err
+	}
+	if b.Height == 0 {
+		if height, confirmations, err := c.resolveBlockPosition(hash); err == nil {
+			b.Height = height
+			if b.Confirmations == 0 {
+				b.Confirmations = confirmations
+			}
+		}
+	}
+	return &b, nil
+}
+
+func (c *RPCClient) resolveBlockPosition(hash string) (int64, int64, error) {
+	tip, err := c.GetBlockCount()
+	if err != nil {
+		return 0, 0, err
+	}
+	for height := tip; height >= 0; height-- {
+		currentHash, err := c.GetBlockHash(height)
+		if err != nil {
+			return 0, 0, err
+		}
+		if currentHash == hash {
+			return height, tip - height + 1, nil
+		}
+	}
+	return 0, 0, fmt.Errorf("block hash not found on active chain: %s", hash)
 }
 
 func (c *RPCClient) GetBlockAtHeight(height int64) (*Block, error) {
