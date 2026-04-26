@@ -37,7 +37,7 @@ func NewServer(rpc *RPCClient, port int) *Server {
 		"sub":            func(a, b int64) int64 { return a - b },
 		"blockReward":    blockRewardForHeight,
 		"safeHTML":       func(s string) template.HTML { return template.HTML(s) },
-	}).Parse(allTemplates))
+	}).Parse(allTemplates + extraTemplates))
 	s.routes()
 	return s
 }
@@ -45,12 +45,16 @@ func NewServer(rpc *RPCClient, port int) *Server {
 func (s *Server) routes() {
 	s.mux.HandleFunc("/", s.handleHome)
 	s.mux.HandleFunc("/block/", s.handleBlock)
+	s.mux.HandleFunc("/tx/", s.handleTx)
+	s.mux.HandleFunc("/address/", s.handleAddress)
 	s.mux.HandleFunc("/blocks", s.handleBlocks)
 	s.mux.HandleFunc("/search", s.handleSearch)
 	s.mux.HandleFunc("/api/stats", s.handleAPIStats)
 	s.mux.HandleFunc("/api/overview", s.handleAPIOverview)
 	s.mux.HandleFunc("/api/blocks", s.handleAPIBlocks)
 	s.mux.HandleFunc("/api/block/", s.handleAPIBlock)
+	s.mux.HandleFunc("/api/tx/", s.handleAPITx)
+	s.mux.HandleFunc("/api/address/", s.handleAPIAddress)
 }
 
 // Start begins serving HTTP requests.
@@ -172,18 +176,64 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	// Try as block height
-	if height, err := strconv.ParseInt(q, 10, 64); err == nil {
+	if height, ok := ParseBlockHeight(q); ok {
 		http.Redirect(w, r, fmt.Sprintf("/block/%d", height), http.StatusFound)
 		return
 	}
-	// Try as block hash (64 hex chars)
-	if len(q) == 64 {
+	if LooksLikeAddress(q) {
+		http.Redirect(w, r, fmt.Sprintf("/address/%s", q), http.StatusFound)
+		return
+	}
+	if IsHexHash(q) {
+		if tx, err := s.cachedTx(q); err == nil && tx != nil {
+			http.Redirect(w, r, fmt.Sprintf("/tx/%s", q), http.StatusFound)
+			return
+		}
 		http.Redirect(w, r, fmt.Sprintf("/block/%s", q), http.StatusFound)
 		return
 	}
 	s.render(w, "error", map[string]interface{}{
-		"Message": fmt.Sprintf("Not found: %s. Enter a block height or block hash.", q),
+		"Message": fmt.Sprintf("Not found: %s. Enter a block height, block hash, transaction ID, or wallet address.", q),
+	})
+}
+
+func (s *Server) handleTx(w http.ResponseWriter, r *http.Request) {
+	txid := strings.TrimSpace(strings.TrimPrefix(r.URL.Path, "/tx/"))
+	if !IsHexHash(txid) {
+		s.render(w, "error", map[string]interface{}{
+			"Message": fmt.Sprintf("Invalid transaction ID: %s", txid),
+		})
+		return
+	}
+	tx, err := s.cachedTx(txid)
+	if err != nil {
+		s.render(w, "error", map[string]interface{}{
+			"Message": fmt.Sprintf("Transaction not found: %s", txid),
+		})
+		return
+	}
+	s.render(w, "tx", map[string]interface{}{
+		"Tx": tx,
+	})
+}
+
+func (s *Server) handleAddress(w http.ResponseWriter, r *http.Request) {
+	address := strings.TrimSpace(strings.TrimPrefix(r.URL.Path, "/address/"))
+	if !LooksLikeAddress(address) {
+		s.render(w, "error", map[string]interface{}{
+			"Message": fmt.Sprintf("Invalid wallet address: %s", address),
+		})
+		return
+	}
+	summary, err := s.cachedAddress(address)
+	if err != nil {
+		s.render(w, "error", map[string]interface{}{
+			"Message": fmt.Sprintf("Address not found or invalid: %s", address),
+		})
+		return
+	}
+	s.render(w, "address", map[string]interface{}{
+		"Address": summary,
 	})
 }
 
@@ -276,6 +326,26 @@ func (s *Server) handleAPIBlock(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, block)
 }
 
+func (s *Server) handleAPITx(w http.ResponseWriter, r *http.Request) {
+	txid := strings.TrimSpace(strings.TrimPrefix(r.URL.Path, "/api/tx/"))
+	tx, err := s.cachedTx(txid)
+	if err != nil {
+		jsonError(w, "transaction not found", 404)
+		return
+	}
+	jsonOK(w, tx)
+}
+
+func (s *Server) handleAPIAddress(w http.ResponseWriter, r *http.Request) {
+	address := strings.TrimSpace(strings.TrimPrefix(r.URL.Path, "/api/address/"))
+	summary, err := s.cachedAddress(address)
+	if err != nil {
+		jsonError(w, "address not found", 404)
+		return
+	}
+	jsonOK(w, summary)
+}
+
 // ── Cache helpers ─────────────────────────────────────────────────────────────
 
 func (s *Server) cachedInfo() (*NodeInfo, error) {
@@ -313,6 +383,32 @@ func (s *Server) cachedRecentBlocks(n int) ([]*Block, error) {
 	}
 	s.cache.Set(key, blocks, 10*time.Second)
 	return blocks, nil
+}
+
+func (s *Server) cachedTx(txid string) (*TransactionSummary, error) {
+	key := fmt.Sprintf("tx:%s", txid)
+	if v, ok := s.cache.Get(key); ok {
+		return v.(*TransactionSummary), nil
+	}
+	tx, err := s.rpc.FindTransaction(txid)
+	if err != nil {
+		return nil, err
+	}
+	s.cache.Set(key, tx, 30*time.Second)
+	return tx, nil
+}
+
+func (s *Server) cachedAddress(address string) (*AddressSummary, error) {
+	key := fmt.Sprintf("address:%s", address)
+	if v, ok := s.cache.Get(key); ok {
+		return v.(*AddressSummary), nil
+	}
+	summary, err := s.rpc.GetAddressBalance(address)
+	if err != nil {
+		return nil, err
+	}
+	s.cache.Set(key, summary, 30*time.Second)
+	return summary, nil
 }
 
 // ── Render helper ─────────────────────────────────────────────────────────────

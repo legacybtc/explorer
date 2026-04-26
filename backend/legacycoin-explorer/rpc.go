@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -155,6 +156,21 @@ type Block struct {
 	Confirmations     int64    `json:"confirmations"`
 }
 
+type AddressSummary struct {
+	Address string  `json:"address"`
+	Balance float64 `json:"balance"`
+}
+
+type TransactionSummary struct {
+	TxID          string `json:"txid"`
+	BlockHash     string `json:"blockhash"`
+	BlockHeight   int64  `json:"blockheight"`
+	BlockTime     uint32 `json:"blocktime"`
+	Confirmations int64  `json:"confirmations"`
+	Index         int    `json:"index"`
+	BlockTxCount  int    `json:"blocktxcount"`
+}
+
 func (c *RPCClient) GetBlock(hash string) (*Block, error) {
 	raw, err := c.call("getblock", hash)
 	if err != nil {
@@ -221,6 +237,90 @@ func (c *RPCClient) GetRecentBlocks(n int) ([]*Block, error) {
 		blocks = append(blocks, b)
 	}
 	return blocks, nil
+}
+
+func (c *RPCClient) GetAddressBalance(address string) (*AddressSummary, error) {
+	raw, err := c.call("getaddressbalance", address)
+	if err != nil {
+		return nil, err
+	}
+	var balance float64
+	if err := json.Unmarshal(raw, &balance); err != nil {
+		return nil, err
+	}
+	return &AddressSummary{
+		Address: address,
+		Balance: balance,
+	}, nil
+}
+
+func (c *RPCClient) FindTransaction(txid string) (*TransactionSummary, error) {
+	tip, err := c.GetBlockCount()
+	if err != nil {
+		return nil, err
+	}
+	for height := tip; height >= 0; height-- {
+		block, err := c.GetBlockAtHeight(height)
+		if err != nil {
+			return nil, err
+		}
+		for idx, current := range block.Tx {
+			if current == txid {
+				return &TransactionSummary{
+					TxID:          txid,
+					BlockHash:     block.Hash,
+					BlockHeight:   height,
+					BlockTime:     block.Time,
+					Confirmations: tip - height + 1,
+					Index:         idx,
+					BlockTxCount:  len(block.Tx),
+				}, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf("transaction not found: %s", txid)
+}
+
+func IsHexHash(s string) bool {
+	if len(s) != 64 {
+		return false
+	}
+	for _, r := range s {
+		if (r < '0' || r > '9') && (r < 'a' || r > 'f') && (r < 'A' || r > 'F') {
+			return false
+		}
+	}
+	return true
+}
+
+func LooksLikeAddress(s string) bool {
+	if len(s) < 26 || len(s) > 35 {
+		return false
+	}
+	if s[0] != '1' && s[0] != '3' {
+		return false
+	}
+	for _, r := range s {
+		switch {
+		case r >= '1' && r <= '9':
+		case r >= 'A' && r <= 'H':
+		case r >= 'J' && r <= 'N':
+		case r >= 'P' && r <= 'Z':
+		case r >= 'a' && r <= 'k':
+		case r >= 'm' && r <= 'z':
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+func ParseBlockHeight(s string) (int64, bool) {
+	height, err := strconv.ParseInt(s, 10, 64)
+	if err != nil || height < 0 {
+		return 0, false
+	}
+	return height, true
 }
 
 // Ping checks if the node is reachable.

@@ -17,6 +17,7 @@ Notes:
 - the GitHub Pages site is static and reads live data from a separate backend API
 - the full explorer backend is deployed on the Debian server and exposed through HTTPS
 - temporary local helper scripts used during deployment are ignored from version control
+- the backend now supports block, transaction ID, and wallet address search
 
 Transparency:
 - the hosted landing page source is in this repo

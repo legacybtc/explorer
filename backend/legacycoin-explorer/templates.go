@@ -309,7 +309,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 }
 `
 
-const navSnip = `<div class="page-shell"><div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><header class="topbar"><a href="/" class="brand"><span class="brand-mark">L</span><span class="brand-copy"><strong><em>LegacyCoin</em> Explorer</strong><span>CPU-secured chain view</span></span></a><nav class="topnav"><a href="/" class="active">Dashboard</a><a href="/blocks">Blocks</a></nav><form class="search-form" action="/search" method="GET"><input type="text" name="q" placeholder="Block height or full hash"><button type="submit">Explore</button></form></header>`
+const navSnip = `<div class="page-shell"><div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><header class="topbar"><a href="/" class="brand"><span class="brand-mark">L</span><span class="brand-copy"><strong><em>LegacyCoin</em> Explorer</strong><span>CPU-secured chain view</span></span></a><nav class="topnav"><a href="/" class="active">Dashboard</a><a href="/blocks">Blocks</a></nav><form class="search-form" action="/search" method="GET"><input type="text" name="q" placeholder="Block, txid, or wallet address"><button type="submit">Explore</button></form></header>`
 const footSnip = `<div class="page footer-card"><span>LegacyCoin (LBTC)</span> public explorer · one CPU, one vote</div></div>`
 const headSnip = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"><style>` + sharedCSS + `</style>`
 
@@ -430,8 +430,8 @@ const allTemplates = `
       </div>
       <div class="stack-card">
         <div class="stack-row"><div class="stack-key">By height</div><div class="stack-val">Search <span class="gold mono">{{if .Info}}{{.Info.Blocks}}{{else}}336{{end}}</span> to open the latest block.</div></div>
-        <div class="stack-row"><div class="stack-key">By hash</div><div class="stack-val">Paste a 64-character block hash into the search bar.</div></div>
-        <div class="stack-row"><div class="stack-key">Next stage</div><div class="stack-val">Address and transaction pages can be added later without changing the visual system.</div></div>
+        <div class="stack-row"><div class="stack-key">By hash</div><div class="stack-val">Paste a 64-character block hash or transaction ID into the search bar.</div></div>
+        <div class="stack-row"><div class="stack-key">By address</div><div class="stack-val">Paste a LegacyCoin wallet address to view its current on-chain balance.</div></div>
       </div>
     </div>
   </div>
@@ -519,7 +519,7 @@ const allTemplates = `
       <tbody>
         {{range $i, $tx := .Block.Tx}}<tr>
           <td class="muted">{{$i}}</td>
-          <td class="mono">{{$tx}}</td>
+          <td class="mono"><a class="gold" href="/tx/{{$tx}}">{{$tx}}</a></td>
           <td>{{if eq $i 0}}<span class="badge warn">Coinbase</span>{{else}}<span class="badge ok">Transfer</span>{{end}}</td>
         </tr>{{else}}<tr><td class="empty-row" colspan="3">No transactions recorded.</td></tr>{{end}}
       </tbody>
