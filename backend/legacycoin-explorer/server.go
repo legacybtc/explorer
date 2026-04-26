@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,11 +14,11 @@ import (
 
 // Server is the block explorer HTTP server.
 type Server struct {
-	rpc    *RPCClient
-	cache  *Cache
-	tmpl   *template.Template
-	port   int
-	mux    *http.ServeMux
+	rpc   *RPCClient
+	cache *Cache
+	tmpl  *template.Template
+	port  int
+	mux   *http.ServeMux
 }
 
 // NewServer creates a new explorer server.
@@ -68,12 +69,13 @@ func (s *Server) Start() {
 // ── Page handlers ─────────────────────────────────────────────────────────────
 
 type homeData struct {
-	NodeOnline   bool
-	Info         *NodeInfo
-	Mining       *MiningInfo
-	RecentBlocks []*Block
-	TipBlock     *Block
-	Error        string
+	NodeOnline      bool
+	Info            *NodeInfo
+	Mining          *MiningInfo
+	RecentBlocks    []*Block
+	TipBlock        *Block
+	NetworkHashrate int64
+	Error           string
 }
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -95,6 +97,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 			data.RecentBlocks = blocks
 			if len(blocks) > 0 {
 				data.TipBlock = blocks[0]
+				data.NetworkHashrate = estimateNetworkHashrate(blocks[0].Bits)
 			}
 		}
 	} else {
@@ -241,28 +244,35 @@ func (s *Server) handleAddress(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleAPIStats(w http.ResponseWriter, r *http.Request) {
 	info, err1 := s.cachedInfo()
-	mining, err2 := s.cachedMining()
+	blocks, err2 := s.cachedRecentBlocks(1)
 	if err1 != nil || err2 != nil {
 		jsonError(w, "node unavailable", 503)
 		return
+	}
+	networkHashrate := int64(0)
+	if len(blocks) > 0 {
+		networkHashrate = estimateNetworkHashrate(blocks[0].Bits)
 	}
 	jsonOK(w, map[string]interface{}{
 		"blocks":       info.Blocks,
 		"connections":  info.Connections,
 		"difficulty":   info.Difficulty,
-		"hashrate":     mining.HashesPerSec,
-		"pooled_tx":    mining.PooledTx,
+		"hashrate":     networkHashrate,
+		"hashrateText": formatHashrate(networkHashrate),
 		"node_version": info.Version,
 	})
 }
 
 func (s *Server) handleAPIOverview(w http.ResponseWriter, r *http.Request) {
 	info, err1 := s.cachedInfo()
-	mining, err2 := s.cachedMining()
-	blocks, err3 := s.cachedRecentBlocks(10)
-	if err1 != nil || err2 != nil || err3 != nil {
+	blocks, err2 := s.cachedRecentBlocks(10)
+	if err1 != nil || err2 != nil {
 		jsonError(w, "node unavailable", 503)
 		return
+	}
+	networkHashrate := int64(0)
+	if len(blocks) > 0 {
+		networkHashrate = estimateNetworkHashrate(blocks[0].Bits)
 	}
 
 	payload := map[string]interface{}{
@@ -277,23 +287,21 @@ func (s *Server) handleAPIOverview(w http.ResponseWriter, r *http.Request) {
 			"blocks":       info.Blocks,
 			"connections":  info.Connections,
 			"difficulty":   info.Difficulty,
-			"hashrate":     mining.HashesPerSec,
-			"hashrateText": formatHashrate(mining.HashesPerSec),
-			"pooledTx":     mining.PooledTx,
+			"hashrate":     networkHashrate,
+			"hashrateText": formatHashrate(networkHashrate),
 			"nodeVersion":  info.Version,
-			"mining":       mining.Generate,
 		},
 		"blocks": blocks,
 	}
 
 	if len(blocks) > 0 {
 		payload["tip"] = map[string]interface{}{
-			"height":      blocks[0].Height,
-			"hash":        blocks[0].Hash,
-			"time":        formatTime(blocks[0].Time),
-			"reward":      formatLBTC(blockRewardForHeight(blocks[0].Height)),
-			"size":        blocks[0].Size,
-			"txCount":     len(blocks[0].Tx),
+			"height":        blocks[0].Height,
+			"hash":          blocks[0].Hash,
+			"time":          formatTime(blocks[0].Time),
+			"reward":        formatLBTC(blockRewardForHeight(blocks[0].Height)),
+			"size":          blocks[0].Size,
+			"txCount":       len(blocks[0].Tx),
 			"confirmations": blocks[0].Confirmations,
 		}
 	}
@@ -445,6 +453,40 @@ func formatHashrate(hs int64) string {
 	default:
 		return fmt.Sprintf("%d H/s", hs)
 	}
+}
+
+func estimateNetworkHashrate(bitsHex string) int64 {
+	bits, err := strconv.ParseUint(bitsHex, 16, 32)
+	if err != nil {
+		return 0
+	}
+	target := compactToBig(uint32(bits))
+	if target.Sign() <= 0 {
+		return 0
+	}
+	one := big.NewInt(1)
+	two256 := new(big.Int).Lsh(one, 256)
+	expectedHashes := new(big.Int).Div(two256, new(big.Int).Add(target, one))
+	expectedHashes.Div(expectedHashes, big.NewInt(600))
+	if !expectedHashes.IsInt64() {
+		return 0
+	}
+	return expectedHashes.Int64()
+}
+
+func compactToBig(bits uint32) *big.Int {
+	exponent := bits >> 24
+	mantissa := bits & 0x007fffff
+	target := new(big.Int).SetInt64(int64(mantissa))
+	if bits&0x00800000 != 0 {
+		target.Neg(target)
+	}
+	if exponent <= 3 {
+		target.Rsh(target, uint(8*(3-exponent)))
+	} else {
+		target.Lsh(target, uint(8*(exponent-3)))
+	}
+	return target
 }
 
 func truncate(s string, n int) string {

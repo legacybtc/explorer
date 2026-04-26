@@ -369,8 +369,8 @@ const allTemplates = `
   </div>
   <div class="stat">
     <div class="stat-label">Hashrate</div>
-    <div class="stat-value">{{if .Mining}}{{formatHashrate .Mining.HashesPerSec}}{{else}}—{{end}}</div>
-    <div class="stat-sub">Local mining sample reported by the connected node.</div>
+    <div class="stat-value">{{if .NetworkHashrate}}{{formatHashrate .NetworkHashrate}}{{else}}—{{end}}</div>
+    <div class="stat-sub">Estimated network hashrate derived from the current proof-of-work target.</div>
   </div>
   <div class="stat">
     <div class="stat-label">Mempool</div>
