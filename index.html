@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LegacyCoin Explorer Redesign Preview</title>
+  <title>LegacyCoin Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -19,8 +19,10 @@
       --muted:#bdb6aa;
       --muted-2:#8d877d;
       --gold:#cba36a;
+      --gold-strong:#e0b77a;
       --cream:#f2ece0;
       --green:#44d78b;
+      --red:#ef6a73;
       --shadow:0 26px 80px rgba(0,0,0,.36);
       --mono:'JetBrains Mono',monospace;
       --sans:'Space Grotesk',system-ui,sans-serif;
@@ -37,6 +39,7 @@
       color:var(--text);
       font-family:var(--sans);
     }
+    a{color:inherit;text-decoration:none}
     .page-shell{position:relative;overflow:hidden;min-height:100vh}
     .ambient{position:absolute;border-radius:999px;filter:blur(78px);opacity:.32;pointer-events:none}
     .ambient-a{width:360px;height:360px;top:120px;left:-90px;background:rgba(203,163,106,.18)}
@@ -66,28 +69,16 @@
     .brand-copy strong em{font-style:normal;color:var(--gold)}
     .brand-copy span{margin-top:6px;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.24em}
     .topnav{display:flex;gap:22px;color:var(--muted);font-size:.95rem}
-    .topnav a{color:inherit;text-decoration:none}
     .topnav a.active{color:var(--cream)}
-    .search-form{
-      display:flex;align-items:center;overflow:hidden;
-      min-width:min(360px,36vw);max-width:420px;
-      border-radius:999px;border:1px solid var(--line);
-      background:rgba(255,255,255,.03)
+    .api-pill{
+      display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border-radius:999px;
+      border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:.84rem;color:var(--muted)
     }
-    .search-form input{
-      flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);
-      font:500 13px var(--mono);padding:14px 16px
-    }
-    .search-form button{
-      border:none;background:linear-gradient(135deg,#d5ad73,#b88747);
-      color:#17120d;font-weight:800;padding:14px 18px
-    }
+    .api-dot{width:9px;height:9px;border-radius:999px;background:var(--red);box-shadow:0 0 0 4px rgba(239,106,115,.12)}
+    .api-pill.online .api-dot{background:var(--green);box-shadow:0 0 0 4px rgba(68,215,139,.12)}
     .page{position:relative;z-index:1;width:min(1320px,calc(100% - 40px));margin:0 auto;padding:30px 0 60px}
-    .hero{
-      display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);
-      gap:22px;align-items:stretch;margin-bottom:22px
-    }
-    .hero-card,.panel,.stat,.table-wrap,.footer-card,.mini-card{
+    .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:22px;align-items:stretch;margin-bottom:22px}
+    .hero-card,.panel,.stat,.table-wrap,.footer-card,.mini-card,.notice{
       border:1px solid var(--line);
       background:var(--panel);
       box-shadow:var(--shadow)
@@ -98,77 +89,58 @@
     }
     .eyebrow{
       display:inline-flex;align-items:center;gap:9px;
-      color:var(--gold);font-size:.74rem;font-weight:700;
-      text-transform:uppercase;letter-spacing:.26em
+      color:var(--gold);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.26em
     }
     .eyebrow::before{content:'';width:30px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
-    .hero h1,.section-heading h2{
-      margin:18px 0 0;
-      font-family:var(--serif);
-      line-height:.94;
-      letter-spacing:-.04em
-    }
+    .hero h1,.section-heading h2{margin:18px 0 0;font-family:var(--serif);line-height:.94;letter-spacing:-.04em}
     .hero h1{font-size:clamp(3rem,7vw,5.8rem);max-width:8ch}
     .hero p{max-width:62ch;margin-top:22px;color:var(--muted);font-size:1.04rem;line-height:1.75}
     .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
     .hero-btn{
-      display:inline-flex;align-items:center;justify-content:center;
-      min-height:48px;padding:0 20px;border-radius:999px;
-      font-size:.92rem;font-weight:700;text-decoration:none
+      display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;
+      border-radius:999px;font-size:.92rem;font-weight:700
     }
     .hero-btn.primary{background:linear-gradient(135deg,#d5ad73,#b88747);color:#16120d}
     .hero-btn.secondary{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--cream)}
     .hero-side{display:grid;gap:16px}
     .mini-card{border-radius:24px;padding:24px}
     .mini-label,.panel-title{color:var(--muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em}
-    .mini-value{margin-top:12px;font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--cream)}
+    .mini-value{margin-top:12px;font-family:var(--mono);font-size:1.34rem;font-weight:700;color:var(--cream);word-break:break-word}
     .mini-copy{margin-top:10px;color:var(--muted);font-size:.95rem;line-height:1.65}
     .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .stats-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-bottom:22px}
     .stat{border-radius:20px;padding:18px 18px 16px;background:rgba(18,22,31,.88)}
     .stat-label{color:var(--muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em}
-    .stat-value{margin-top:11px;font-family:var(--mono);font-size:1.25rem;font-weight:700;color:var(--cream)}
+    .stat-value{margin-top:11px;font-family:var(--mono);font-size:1.18rem;font-weight:700;color:var(--cream)}
     .stat-sub{margin-top:8px;color:var(--muted-2);font-size:.82rem;line-height:1.5}
     .status-live{color:var(--green)}
+    .status-offline{color:var(--red)}
     .section-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,.85fr);gap:18px;margin-bottom:20px}
     .panel{border-radius:24px;padding:22px}
     .panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
     .panel-copy h2,.panel-copy h3{font-family:var(--serif);font-size:2rem;line-height:1;margin:0}
     .panel-copy p{margin-top:8px;color:var(--muted);font-size:.95rem}
-    .panel-link{color:var(--gold);font-size:.88rem;font-weight:700;text-decoration:none}
+    .panel-link{color:var(--gold);font-size:.88rem;font-weight:700}
     .table-wrap{border-radius:22px;overflow:hidden}
     table{width:100%;border-collapse:collapse}
-    thead th{
-      background:rgba(255,255,255,.03);color:var(--muted);
-      font-size:.7rem;font-weight:700;text-transform:uppercase;
-      letter-spacing:.18em;text-align:left;padding:14px 16px
-    }
-    tbody td{padding:14px 16px;border-top:1px solid rgba(255,255,255,.05);font-size:.92rem}
+    thead th{background:rgba(255,255,255,.03);color:var(--muted);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em;text-align:left;padding:14px 16px}
+    tbody td{padding:14px 16px;border-top:1px solid rgba(255,255,255,.05);font-size:.92rem;vertical-align:middle}
     .mono{font-family:var(--mono)}
     .muted{color:var(--muted)}
     .gold{color:var(--gold)}
-    .badge{
-      display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;
-      font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-      background:rgba(68,215,139,.10);color:var(--green);border:1px solid rgba(68,215,139,.18)
-    }
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(68,215,139,.10);color:var(--green);border:1px solid rgba(68,215,139,.18)}
     .stack{display:grid;gap:14px}
-    .stack-card{
-      background:rgba(255,255,255,.025);
-      border:1px solid var(--line);
-      border-radius:18px;padding:16px 18px
-    }
+    .stack-card{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
     .stack-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid rgba(255,255,255,.05)}
     .stack-row:first-child{border-top:none;padding-top:0}
     .stack-key{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em}
     .stack-val{font-size:.93rem;text-align:right;color:var(--cream);word-break:break-word}
-    .footer-card{
-      margin-top:22px;border-radius:24px;padding:20px 24px;
-      background:rgba(255,255,255,.025);text-align:center;color:var(--muted);font-size:.92rem
-    }
+    .notice{border-radius:22px;padding:18px 20px;margin-bottom:18px;background:rgba(239,106,115,.08);border-color:rgba(239,106,115,.18);color:#ffd7db}
+    .footer-card{margin-top:22px;border-radius:24px;padding:20px 24px;background:rgba(255,255,255,.025);text-align:center;color:var(--muted);font-size:.92rem}
     .footer-card span{color:var(--gold)}
+    code{font-family:var(--mono);font-size:.86em}
     @media(max-width:1180px){.hero,.section-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:860px){.topbar{padding:16px 18px;flex-wrap:wrap}.search-form{min-width:100%;max-width:none;order:3}.page{width:min(100%,calc(100% - 24px))}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:860px){.topbar{padding:16px 18px;flex-wrap:wrap}.page{width:min(100%,calc(100% - 24px))}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:560px){.mini-grid,.stats-grid{grid-template-columns:1fr}.panel-head{flex-direction:column;align-items:flex-start}}
   </style>
 </head>
@@ -185,31 +157,35 @@
         </span>
       </div>
       <nav class="topnav">
-        <a class="active" href="#">Dashboard</a>
-        <a href="#">Blocks</a>
+        <a class="active" href="https://legacybtc.github.io/explorer/">Dashboard</a>
+        <a href="#" id="openExplorerNav">Blocks</a>
       </nav>
-      <form class="search-form">
-        <input type="text" placeholder="Block height or full hash">
-        <button type="button">Explore</button>
-      </form>
+      <div class="api-pill" id="apiPill">
+        <span class="api-dot"></span>
+        <span id="apiPillText">Waiting for explorer API</span>
+      </div>
     </header>
 
     <main class="page">
+      <div class="notice" id="noticeBox">
+        Live data requires a reachable Explorer API. On GitHub Pages, this page stays static unless you point it at a public HTTPS backend. Current target: <code id="apiBaseText">/api/overview</code>.
+      </div>
+
       <section class="hero">
         <div class="hero-card">
           <div class="eyebrow">Live chain intelligence</div>
           <h1>LegacyCoin Explorer</h1>
-          <p>Track the LBTC network with a cleaner public view of chain height, block flow, mining activity, confirmations, and on-chain history. This preview shows the new visual direction matched to your website and whitepaper style.</p>
+          <p>Track the LBTC network with a cleaner public view of chain height, block flow, mining activity, confirmations, and on-chain history. This page is ready to read live explorer data once the backend is reachable over HTTPS.</p>
           <div class="hero-actions">
-            <a class="hero-btn primary" href="#">Browse blocks</a>
-            <a class="hero-btn secondary" href="#">Jump to tip</a>
+            <a class="hero-btn primary" id="openExplorerBtn" href="#">Open full explorer</a>
+            <a class="hero-btn secondary" id="refreshBtn" href="#">Refresh data</a>
           </div>
         </div>
         <div class="hero-side">
           <div class="mini-card">
-            <div class="mini-label">Chain posture</div>
-            <div class="mini-value">Online</div>
-            <div class="mini-copy">A public chain view for LegacyCoin’s fixed-supply, Yespower-mined network with DGW3 retargeting and transparent block visibility.</div>
+            <div class="mini-label">Tip hash</div>
+            <div class="mini-value" id="tipHash">Waiting for backend</div>
+            <div class="mini-copy" id="tipCopy">Once the API is reachable, the latest block hash, timestamp, and reward will appear here.</div>
           </div>
           <div class="mini-grid">
             <div class="mini-card">
@@ -219,20 +195,20 @@
             </div>
             <div class="mini-card">
               <div class="mini-label">Security model</div>
-              <div class="mini-value">CPU</div>
-              <div class="mini-copy">Focused on accessible mining and simple public verification.</div>
+              <div class="mini-value" id="consensusValue">CPU</div>
+              <div class="mini-copy" id="consensusCopy">Focused on accessible mining and simple public verification.</div>
             </div>
           </div>
         </div>
       </section>
 
       <section class="stats-grid">
-        <div class="stat"><div class="stat-label">Status</div><div class="stat-value status-live">Node online</div><div class="stat-sub">RPC is responding and chain data is available.</div></div>
-        <div class="stat"><div class="stat-label">Chain height</div><div class="stat-value">336</div><div class="stat-sub">Current best block known to the connected node.</div></div>
-        <div class="stat"><div class="stat-label">Difficulty</div><div class="stat-value">0.000244137</div><div class="stat-sub">Dynamic per-block retargeting under DGW3.</div></div>
-        <div class="stat"><div class="stat-label">Peers</div><div class="stat-value">1</div><div class="stat-sub">Active node connections visible to the explorer backend.</div></div>
-        <div class="stat"><div class="stat-label">Hashrate</div><div class="stat-value">14.82 kH/s</div><div class="stat-sub">Local mining sample reported by the connected node.</div></div>
-        <div class="stat"><div class="stat-label">Mempool</div><div class="stat-value">0</div><div class="stat-sub">Pending transactions waiting for inclusion in a block.</div></div>
+        <div class="stat"><div class="stat-label">Status</div><div class="stat-value status-offline" id="statusValue">API offline</div><div class="stat-sub" id="statusSub">No live backend data is available from this page yet.</div></div>
+        <div class="stat"><div class="stat-label">Chain height</div><div class="stat-value" id="blocksValue">--</div><div class="stat-sub">Current best block known to the connected node.</div></div>
+        <div class="stat"><div class="stat-label">Difficulty</div><div class="stat-value" id="difficultyValue">--</div><div class="stat-sub">Dynamic per-block retargeting under DGW3.</div></div>
+        <div class="stat"><div class="stat-label">Peers</div><div class="stat-value" id="peersValue">--</div><div class="stat-sub">Active node connections visible to the explorer backend.</div></div>
+        <div class="stat"><div class="stat-label">Hashrate</div><div class="stat-value" id="hashrateValue">--</div><div class="stat-sub">Live node-reported hashrate sample.</div></div>
+        <div class="stat"><div class="stat-label">Mempool</div><div class="stat-value" id="mempoolValue">--</div><div class="stat-sub">Pending transactions waiting for inclusion in a block.</div></div>
       </section>
 
       <section class="section-grid">
@@ -242,41 +218,15 @@
               <h2>Latest blocks</h2>
               <p>Recent chain activity with block reward, size, transaction count, and confirmations.</p>
             </div>
-            <a class="panel-link" href="#">Open full block list</a>
+            <a class="panel-link" id="openExplorerTableLink" href="#">Open full explorer</a>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr><th>Height</th><th>Hash</th><th>Time (UTC)</th><th>Txs</th><th>Reward</th><th>Size</th><th>Confs</th></tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td class="gold mono">336</td>
-                  <td class="gold mono">00000e58c76a866050963d0efd15bbe8…</td>
-                  <td class="muted">2026-04-26 00:52:46 UTC</td>
-                  <td>1</td>
-                  <td class="gold mono">50.00000000 LBTC</td>
-                  <td class="muted">261 B</td>
-                  <td><span class="badge">1</span></td>
-                </tr>
-                <tr>
-                  <td class="gold mono">335</td>
-                  <td class="gold mono">00000481c8f9809b1bc9d4f8bfa5f117…</td>
-                  <td class="muted">2026-04-26 00:49:11 UTC</td>
-                  <td>1</td>
-                  <td class="gold mono">50.00000000 LBTC</td>
-                  <td class="muted">261 B</td>
-                  <td><span class="badge">2</span></td>
-                </tr>
-                <tr>
-                  <td class="gold mono">334</td>
-                  <td class="gold mono">0000003de60e6fe8589197d866ff9bb2…</td>
-                  <td class="muted">2026-04-25 18:34:24 UTC</td>
-                  <td>1</td>
-                  <td class="gold mono">50.00000000 LBTC</td>
-                  <td class="muted">261 B</td>
-                  <td><span class="badge">3</span></td>
-                </tr>
+              <tbody id="blocksTableBody">
+                <tr><td colspan="7" class="muted">No live block data yet.</td></tr>
               </tbody>
             </table>
           </div>
@@ -287,37 +237,155 @@
             <div class="panel-head">
               <div class="panel-copy">
                 <h3>Network summary</h3>
-                <p>High-level chain and node facts from the current RPC endpoint.</p>
+                <p>High-level chain and node facts from the current explorer backend.</p>
               </div>
             </div>
             <div class="stack-card">
-              <div class="stack-row"><div class="stack-key">Consensus</div><div class="stack-val">Yespower 1.0</div></div>
-              <div class="stack-row"><div class="stack-key">Retarget</div><div class="stack-val">Dark Gravity Wave v3</div></div>
-              <div class="stack-row"><div class="stack-key">Emission</div><div class="stack-val">50 LBTC base reward</div></div>
-              <div class="stack-row"><div class="stack-key">Node version</div><div class="stack-val">10000</div></div>
-              <div class="stack-row"><div class="stack-key">Mining</div><div class="stack-val">Enabled</div></div>
-              <div class="stack-row"><div class="stack-key">Explorer mode</div><div class="stack-val">RPC direct</div></div>
+              <div class="stack-row"><div class="stack-key">Consensus</div><div class="stack-val" id="summaryConsensus">Yespower 1.0</div></div>
+              <div class="stack-row"><div class="stack-key">Retarget</div><div class="stack-val" id="summaryRetarget">Dark Gravity Wave v3</div></div>
+              <div class="stack-row"><div class="stack-key">Supply cap</div><div class="stack-val" id="summarySupply">21M</div></div>
+              <div class="stack-row"><div class="stack-key">Node version</div><div class="stack-val" id="summaryVersion">--</div></div>
+              <div class="stack-row"><div class="stack-key">Mining</div><div class="stack-val" id="summaryMining">--</div></div>
+              <div class="stack-row"><div class="stack-key">API base</div><div class="stack-val" id="summaryApiBase">/api/overview</div></div>
             </div>
           </div>
 
           <div class="panel">
             <div class="panel-head">
               <div class="panel-copy">
-                <h3>Search tips</h3>
-                <p>The current explorer resolves block heights and full block hashes.</p>
+                <h3>Backend notes</h3>
+                <p>This Pages site can mirror live explorer data only when the backend is reachable from the browser.</p>
               </div>
             </div>
             <div class="stack-card">
-              <div class="stack-row"><div class="stack-key">By height</div><div class="stack-val">Search <span class="gold mono">336</span> to open the latest block.</div></div>
-              <div class="stack-row"><div class="stack-key">By hash</div><div class="stack-val">Paste a 64-character block hash into the search bar.</div></div>
-              <div class="stack-row"><div class="stack-key">Next stage</div><div class="stack-val">Address and transaction pages can be added later without changing the visual system.</div></div>
+              <div class="stack-row"><div class="stack-key">GitHub Pages</div><div class="stack-val">Static, HTTPS-only frontend.</div></div>
+              <div class="stack-row"><div class="stack-key">Explorer backend</div><div class="stack-val">Should be public over HTTPS for live browser fetches.</div></div>
+              <div class="stack-row"><div class="stack-key">Current server</div><div class="stack-val">Debian host running the full Go explorer.</div></div>
             </div>
           </div>
         </div>
       </section>
 
-      <div class="footer-card"><span>LegacyCoin (LBTC)</span> public explorer · one CPU, one vote</div>
+      <div class="footer-card"><span>LegacyCoin (LBTC)</span> public explorer landing page · one CPU, one vote</div>
     </main>
   </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const explicitApi = params.get("api");
+    const fallbackApi = "";
+    const apiBase = explicitApi || fallbackApi;
+    const overviewUrl = apiBase ? apiBase.replace(/\/$/, "") + "/api/overview" : "";
+    const explorerHomeUrl = apiBase || "#";
+
+    const noticeBox = document.getElementById("noticeBox");
+    const apiBaseText = document.getElementById("apiBaseText");
+    const apiPill = document.getElementById("apiPill");
+    const apiPillText = document.getElementById("apiPillText");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    const statusValue = document.getElementById("statusValue");
+    const statusSub = document.getElementById("statusSub");
+    const blocksValue = document.getElementById("blocksValue");
+    const difficultyValue = document.getElementById("difficultyValue");
+    const peersValue = document.getElementById("peersValue");
+    const hashrateValue = document.getElementById("hashrateValue");
+    const mempoolValue = document.getElementById("mempoolValue");
+    const tipHash = document.getElementById("tipHash");
+    const tipCopy = document.getElementById("tipCopy");
+    const blocksTableBody = document.getElementById("blocksTableBody");
+    const summaryConsensus = document.getElementById("summaryConsensus");
+    const summaryRetarget = document.getElementById("summaryRetarget");
+    const summarySupply = document.getElementById("summarySupply");
+    const summaryVersion = document.getElementById("summaryVersion");
+    const summaryMining = document.getElementById("summaryMining");
+    const summaryApiBase = document.getElementById("summaryApiBase");
+    const consensusValue = document.getElementById("consensusValue");
+    const consensusCopy = document.getElementById("consensusCopy");
+
+    for (const id of ["openExplorerBtn", "openExplorerNav", "openExplorerTableLink"]) {
+      const el = document.getElementById(id);
+      if (el && explorerHomeUrl !== "#") {
+        el.href = explorerHomeUrl;
+      }
+    }
+
+    apiBaseText.textContent = overviewUrl || "No API configured";
+    summaryApiBase.textContent = overviewUrl || "No API configured";
+
+    function truncateHash(hash) {
+      return hash.length > 32 ? hash.slice(0, 32) + "..." : hash;
+    }
+
+    function renderBlocks(blocks) {
+      if (!blocks || !blocks.length) {
+        blocksTableBody.innerHTML = '<tr><td colspan="7" class="muted">No live block data yet.</td></tr>';
+        return;
+      }
+      blocksTableBody.innerHTML = blocks.slice(0, 6).map((block) => `
+        <tr>
+          <td class="gold mono">${block.height}</td>
+          <td class="gold mono">${truncateHash(block.hash)}</td>
+          <td class="muted">${new Date(block.time * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC")}</td>
+          <td>${block.tx.length}</td>
+          <td class="gold mono">50.00000000 LBTC</td>
+          <td class="muted">${block.size} B</td>
+          <td><span class="badge">${block.confirmations}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadOverview() {
+      if (!overviewUrl) {
+        noticeBox.textContent = "Live data is not configured yet. Add ?api=https://your-public-explorer.example to the URL once the backend is publicly reachable over HTTPS.";
+        return;
+      }
+
+      try {
+        const res = await fetch(overviewUrl, { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+        const data = await res.json();
+        apiPill.classList.add("online");
+        apiPillText.textContent = "Explorer API online";
+        noticeBox.textContent = "Live backend connected successfully. This page is now reading real LegacyCoin explorer data.";
+        statusValue.textContent = "API online";
+        statusValue.className = "stat-value status-live";
+        statusSub.textContent = "Explorer API responded successfully.";
+
+        blocksValue.textContent = data.stats.blocks;
+        difficultyValue.textContent = Number(data.stats.difficulty).toFixed(9);
+        peersValue.textContent = data.stats.connections;
+        hashrateValue.textContent = data.stats.hashrateText;
+        mempoolValue.textContent = data.stats.pooledTx;
+        summaryVersion.textContent = data.stats.nodeVersion;
+        summaryMining.textContent = data.stats.mining ? "Enabled" : "Disabled";
+        summaryConsensus.textContent = data.network.consensus;
+        summaryRetarget.textContent = data.network.retarget;
+        summarySupply.textContent = data.network.supplyCap;
+        consensusValue.textContent = data.network.ticker;
+        consensusCopy.textContent = data.network.consensus + " with " + data.network.retarget + ".";
+
+        if (data.tip) {
+          tipHash.textContent = truncateHash(data.tip.hash);
+          tipCopy.textContent = "Tip #" + data.tip.height + " • " + data.tip.time + " • " + data.tip.reward;
+        }
+
+        renderBlocks(data.blocks);
+      } catch (err) {
+        apiPill.classList.remove("online");
+        apiPillText.textContent = "Explorer API offline";
+        noticeBox.textContent = "Could not load live explorer data from " + overviewUrl + ". If this page is on GitHub Pages, the backend must be public and HTTPS-accessible for fetches to work.";
+      }
+    }
+
+    refreshBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      loadOverview();
+    });
+
+    loadOverview();
+  </script>
 </body>
 </html>
