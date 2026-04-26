@@ -355,7 +355,8 @@
 
         const health = await healthRes.json();
         const network = await networkRes.json();
-        const blocks = await blocksRes.json();
+        const blockPayload = await blocksRes.json();
+        const blocks = Array.isArray(blockPayload) ? blockPayload : (blockPayload.blocks || []);
 
         apiPill.classList.add("online");
         apiPillText.textContent = "LBTC REST API online";
