@@ -96,6 +96,36 @@
     .hero h1{font-size:clamp(3rem,7vw,5.8rem);max-width:8ch}
     .hero p{max-width:62ch;margin-top:22px;color:var(--muted);font-size:1.04rem;line-height:1.75}
     .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+    .search-shell{
+      margin-top:24px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center
+    }
+    .search-input{
+      flex:1 1 360px;
+      min-height:52px;
+      padding:0 18px;
+      border-radius:16px;
+      border:1px solid var(--line-strong);
+      background:rgba(255,255,255,.04);
+      color:var(--cream);
+      font-family:var(--mono);
+      font-size:.95rem;
+      outline:none
+    }
+    .search-input::placeholder{color:var(--muted-2)}
+    .search-btn{
+      min-height:52px;
+      padding:0 18px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--cream);
+      font-weight:700;
+      cursor:pointer
+    }
     .hero-btn{
       display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;
       border-radius:999px;font-size:.92rem;font-weight:700
@@ -176,8 +206,12 @@
           <div class="eyebrow">Live chain intelligence</div>
           <h1>LegacyCoin Explorer</h1>
           <p>Track the LBTC network with a cleaner public view of chain height, block flow, confirmations, supply posture, and public API transparency. This page now reads from the dedicated LBTC REST API over HTTPS.</p>
+          <form class="search-shell" id="searchForm">
+            <input class="search-input" id="searchInput" type="text" placeholder="Search block height, block hash, txid, or wallet address" />
+            <button class="search-btn" type="submit">Search</button>
+          </form>
           <div class="hero-actions">
-            <a class="hero-btn primary" id="openExplorerBtn" href="#">Open API docs</a>
+            <a class="hero-btn primary" id="openExplorerBtn" href="#">Open Explorer</a>
             <a class="hero-btn secondary" id="refreshBtn" href="#">Refresh data</a>
           </div>
         </div>
@@ -273,8 +307,11 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const explicitApi = params.get("api");
+    const explicitExplorer = params.get("explorer");
     const fallbackApi = "https://pursuant-stripes-headphones-separately.trycloudflare.com";
+    const fallbackExplorer = "https://alliance-folk-lighting-somewhat.trycloudflare.com";
     const apiBase = explicitApi || fallbackApi;
+    const explorerBase = explicitExplorer || fallbackExplorer;
     const networkUrl = apiBase ? apiBase.replace(/\/$/, "") + "/v1/info/network" : "";
     const healthUrl = apiBase ? apiBase.replace(/\/$/, "") + "/health" : "";
     const blocksUrl = apiBase ? apiBase.replace(/\/$/, "") + "/v1/blocks?limit=10&offset=0" : "";
@@ -285,6 +322,8 @@
     const apiPill = document.getElementById("apiPill");
     const apiPillText = document.getElementById("apiPillText");
     const refreshBtn = document.getElementById("refreshBtn");
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
 
     const statusValue = document.getElementById("statusValue");
     const statusSub = document.getElementById("statusSub");
@@ -307,8 +346,8 @@
 
     for (const id of ["openExplorerBtn", "openExplorerNav", "openExplorerTableLink"]) {
       const el = document.getElementById(id);
-      if (el && docsUrl !== "#") {
-        el.href = docsUrl;
+      if (el && explorerBase !== "#") {
+        el.href = id === "openExplorerBtn" ? explorerBase : explorerBase + "/blocks";
       }
     }
 
@@ -317,6 +356,39 @@
 
     function truncateHash(hash) {
       return hash.length > 32 ? hash.slice(0, 32) + "..." : hash;
+    }
+
+    function looksLikeAddress(value) {
+      return /^[13][1-9A-HJ-NP-Za-km-z]{25,34}$/.test(value);
+    }
+
+    function looksLikeHash(value) {
+      return /^[A-Fa-f0-9]{64}$/.test(value);
+    }
+
+    async function routeSearch(query) {
+      const value = query.trim();
+      if (!value) return;
+      if (/^\d+$/.test(value)) {
+        window.location.href = explorerBase + "/block/" + encodeURIComponent(value);
+        return;
+      }
+      if (looksLikeAddress(value)) {
+        window.location.href = explorerBase + "/address/" + encodeURIComponent(value);
+        return;
+      }
+      if (looksLikeHash(value)) {
+        try {
+          const txRes = await fetch(apiBase.replace(/\/$/, "") + "/v1/transactions/" + value, { cache: "no-store" });
+          if (txRes.ok) {
+            window.location.href = explorerBase + "/tx/" + encodeURIComponent(value);
+            return;
+          }
+        } catch (err) {}
+        window.location.href = explorerBase + "/block/" + encodeURIComponent(value);
+        return;
+      }
+      noticeBox.textContent = "Search accepts block heights, block hashes, transaction IDs, and LegacyCoin wallet addresses.";
     }
 
     function renderBlocks(blocks) {
@@ -394,6 +466,11 @@
     refreshBtn.addEventListener("click", (event) => {
       event.preventDefault();
       loadOverview();
+    });
+
+    searchForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await routeSearch(searchInput.value);
     });
 
     loadOverview();
