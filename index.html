@@ -273,7 +273,7 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const explicitApi = params.get("api");
-    const fallbackApi = "";
+    const fallbackApi = "https://sizes-farmer-internship-pictures.trycloudflare.com";
     const apiBase = explicitApi || fallbackApi;
     const overviewUrl = apiBase ? apiBase.replace(/\/$/, "") + "/api/overview" : "";
     const explorerHomeUrl = apiBase || "#";
