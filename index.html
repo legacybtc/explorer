@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegacyCoin Explorer Redesign Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#08090d;
+      --bg-soft:#11141a;
+      --panel:rgba(18,22,31,.92);
+      --panel-strong:#151922;
+      --line:rgba(255,255,255,.08);
+      --line-strong:rgba(203,163,106,.22);
+      --text:#f3f0ea;
+      --muted:#bdb6aa;
+      --muted-2:#8d877d;
+      --gold:#cba36a;
+      --cream:#f2ece0;
+      --green:#44d78b;
+      --shadow:0 26px 80px rgba(0,0,0,.36);
+      --mono:'JetBrains Mono',monospace;
+      --sans:'Space Grotesk',system-ui,sans-serif;
+      --serif:'Cormorant Garamond',serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(203,163,106,.14), transparent 28%),
+        radial-gradient(circle at 84% 14%, rgba(98,116,164,.12), transparent 26%),
+        linear-gradient(180deg, #090b10 0%, #0d1016 42%, #090b10 100%);
+      color:var(--text);
+      font-family:var(--sans);
+    }
+    .page-shell{position:relative;overflow:hidden;min-height:100vh}
+    .ambient{position:absolute;border-radius:999px;filter:blur(78px);opacity:.32;pointer-events:none}
+    .ambient-a{width:360px;height:360px;top:120px;left:-90px;background:rgba(203,163,106,.18)}
+    .ambient-b{width:420px;height:420px;top:520px;right:-130px;background:rgba(83,96,141,.20)}
+    .topbar{
+      position:sticky;top:0;z-index:20;
+      display:flex;align-items:center;justify-content:space-between;gap:24px;
+      padding:18px 34px;
+      background:rgba(9,11,16,.78);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(255,255,255,.05)
+    }
+    .brand{display:inline-flex;align-items:center;gap:14px}
+    .brand-mark{
+      width:48px;height:48px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(203,163,106,.18), rgba(255,255,255,.02)), var(--panel-strong);
+      border:1px solid var(--line-strong);
+      color:var(--cream);
+      font-family:var(--serif);
+      font-size:34px;
+      font-weight:700;
+      box-shadow:var(--shadow)
+    }
+    .brand-copy{display:flex;flex-direction:column;line-height:1}
+    .brand-copy strong{font-size:1rem;letter-spacing:.04em}
+    .brand-copy strong em{font-style:normal;color:var(--gold)}
+    .brand-copy span{margin-top:6px;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.24em}
+    .topnav{display:flex;gap:22px;color:var(--muted);font-size:.95rem}
+    .topnav a{color:inherit;text-decoration:none}
+    .topnav a.active{color:var(--cream)}
+    .search-form{
+      display:flex;align-items:center;overflow:hidden;
+      min-width:min(360px,36vw);max-width:420px;
+      border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.03)
+    }
+    .search-form input{
+      flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);
+      font:500 13px var(--mono);padding:14px 16px
+    }
+    .search-form button{
+      border:none;background:linear-gradient(135deg,#d5ad73,#b88747);
+      color:#17120d;font-weight:800;padding:14px 18px
+    }
+    .page{position:relative;z-index:1;width:min(1320px,calc(100% - 40px));margin:0 auto;padding:30px 0 60px}
+    .hero{
+      display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);
+      gap:22px;align-items:stretch;margin-bottom:22px
+    }
+    .hero-card,.panel,.stat,.table-wrap,.footer-card,.mini-card{
+      border:1px solid var(--line);
+      background:var(--panel);
+      box-shadow:var(--shadow)
+    }
+    .hero-card{
+      border-radius:28px;padding:32px;
+      background:linear-gradient(160deg, rgba(203,163,106,.10), rgba(255,255,255,.02)), var(--panel-strong)
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:9px;
+      color:var(--gold);font-size:.74rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.26em
+    }
+    .eyebrow::before{content:'';width:30px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+    .hero h1,.section-heading h2{
+      margin:18px 0 0;
+      font-family:var(--serif);
+      line-height:.94;
+      letter-spacing:-.04em
+    }
+    .hero h1{font-size:clamp(3rem,7vw,5.8rem);max-width:8ch}
+    .hero p{max-width:62ch;margin-top:22px;color:var(--muted);font-size:1.04rem;line-height:1.75}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+    .hero-btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:48px;padding:0 20px;border-radius:999px;
+      font-size:.92rem;font-weight:700;text-decoration:none
+    }
+    .hero-btn.primary{background:linear-gradient(135deg,#d5ad73,#b88747);color:#16120d}
+    .hero-btn.secondary{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--cream)}
+    .hero-side{display:grid;gap:16px}
+    .mini-card{border-radius:24px;padding:24px}
+    .mini-label,.panel-title{color:var(--muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em}
+    .mini-value{margin-top:12px;font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--cream)}
+    .mini-copy{margin-top:10px;color:var(--muted);font-size:.95rem;line-height:1.65}
+    .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .stats-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-bottom:22px}
+    .stat{border-radius:20px;padding:18px 18px 16px;background:rgba(18,22,31,.88)}
+    .stat-label{color:var(--muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em}
+    .stat-value{margin-top:11px;font-family:var(--mono);font-size:1.25rem;font-weight:700;color:var(--cream)}
+    .stat-sub{margin-top:8px;color:var(--muted-2);font-size:.82rem;line-height:1.5}
+    .status-live{color:var(--green)}
+    .section-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,.85fr);gap:18px;margin-bottom:20px}
+    .panel{border-radius:24px;padding:22px}
+    .panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .panel-copy h2,.panel-copy h3{font-family:var(--serif);font-size:2rem;line-height:1;margin:0}
+    .panel-copy p{margin-top:8px;color:var(--muted);font-size:.95rem}
+    .panel-link{color:var(--gold);font-size:.88rem;font-weight:700;text-decoration:none}
+    .table-wrap{border-radius:22px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    thead th{
+      background:rgba(255,255,255,.03);color:var(--muted);
+      font-size:.7rem;font-weight:700;text-transform:uppercase;
+      letter-spacing:.18em;text-align:left;padding:14px 16px
+    }
+    tbody td{padding:14px 16px;border-top:1px solid rgba(255,255,255,.05);font-size:.92rem}
+    .mono{font-family:var(--mono)}
+    .muted{color:var(--muted)}
+    .gold{color:var(--gold)}
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;
+      font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      background:rgba(68,215,139,.10);color:var(--green);border:1px solid rgba(68,215,139,.18)
+    }
+    .stack{display:grid;gap:14px}
+    .stack-card{
+      background:rgba(255,255,255,.025);
+      border:1px solid var(--line);
+      border-radius:18px;padding:16px 18px
+    }
+    .stack-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid rgba(255,255,255,.05)}
+    .stack-row:first-child{border-top:none;padding-top:0}
+    .stack-key{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em}
+    .stack-val{font-size:.93rem;text-align:right;color:var(--cream);word-break:break-word}
+    .footer-card{
+      margin-top:22px;border-radius:24px;padding:20px 24px;
+      background:rgba(255,255,255,.025);text-align:center;color:var(--muted);font-size:.92rem
+    }
+    .footer-card span{color:var(--gold)}
+    @media(max-width:1180px){.hero,.section-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:860px){.topbar{padding:16px 18px;flex-wrap:wrap}.search-form{min-width:100%;max-width:none;order:3}.page{width:min(100%,calc(100% - 24px))}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.mini-grid,.stats-grid{grid-template-columns:1fr}.panel-head{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">L</span>
+        <span class="brand-copy">
+          <strong><em>LegacyCoin</em> Explorer</strong>
+          <span>CPU-secured chain view</span>
+        </span>
+      </div>
+      <nav class="topnav">
+        <a class="active" href="#">Dashboard</a>
+        <a href="#">Blocks</a>
+      </nav>
+      <form class="search-form">
+        <input type="text" placeholder="Block height or full hash">
+        <button type="button">Explore</button>
+      </form>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-card">
+          <div class="eyebrow">Live chain intelligence</div>
+          <h1>LegacyCoin Explorer</h1>
+          <p>Track the LBTC network with a cleaner public view of chain height, block flow, mining activity, confirmations, and on-chain history. This preview shows the new visual direction matched to your website and whitepaper style.</p>
+          <div class="hero-actions">
+            <a class="hero-btn primary" href="#">Browse blocks</a>
+            <a class="hero-btn secondary" href="#">Jump to tip</a>
+          </div>
+        </div>
+        <div class="hero-side">
+          <div class="mini-card">
+            <div class="mini-label">Chain posture</div>
+            <div class="mini-value">Online</div>
+            <div class="mini-copy">A public chain view for LegacyCoin’s fixed-supply, Yespower-mined network with DGW3 retargeting and transparent block visibility.</div>
+          </div>
+          <div class="mini-grid">
+            <div class="mini-card">
+              <div class="mini-label">Network goal</div>
+              <div class="mini-value">21M</div>
+              <div class="mini-copy">Hard cap with Bitcoin-style emission and long-horizon halvings.</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-label">Security model</div>
+              <div class="mini-value">CPU</div>
+              <div class="mini-copy">Focused on accessible mining and simple public verification.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat"><div class="stat-label">Status</div><div class="stat-value status-live">Node online</div><div class="stat-sub">RPC is responding and chain data is available.</div></div>
+        <div class="stat"><div class="stat-label">Chain height</div><div class="stat-value">336</div><div class="stat-sub">Current best block known to the connected node.</div></div>
+        <div class="stat"><div class="stat-label">Difficulty</div><div class="stat-value">0.000244137</div><div class="stat-sub">Dynamic per-block retargeting under DGW3.</div></div>
+        <div class="stat"><div class="stat-label">Peers</div><div class="stat-value">1</div><div class="stat-sub">Active node connections visible to the explorer backend.</div></div>
+        <div class="stat"><div class="stat-label">Hashrate</div><div class="stat-value">14.82 kH/s</div><div class="stat-sub">Local mining sample reported by the connected node.</div></div>
+        <div class="stat"><div class="stat-label">Mempool</div><div class="stat-value">0</div><div class="stat-sub">Pending transactions waiting for inclusion in a block.</div></div>
+      </section>
+
+      <section class="section-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-copy">
+              <h2>Latest blocks</h2>
+              <p>Recent chain activity with block reward, size, transaction count, and confirmations.</p>
+            </div>
+            <a class="panel-link" href="#">Open full block list</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Height</th><th>Hash</th><th>Time (UTC)</th><th>Txs</th><th>Reward</th><th>Size</th><th>Confs</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="gold mono">336</td>
+                  <td class="gold mono">00000e58c76a866050963d0efd15bbe8…</td>
+                  <td class="muted">2026-04-26 00:52:46 UTC</td>
+                  <td>1</td>
+                  <td class="gold mono">50.00000000 LBTC</td>
+                  <td class="muted">261 B</td>
+                  <td><span class="badge">1</span></td>
+                </tr>
+                <tr>
+                  <td class="gold mono">335</td>
+                  <td class="gold mono">00000481c8f9809b1bc9d4f8bfa5f117…</td>
+                  <td class="muted">2026-04-26 00:49:11 UTC</td>
+                  <td>1</td>
+                  <td class="gold mono">50.00000000 LBTC</td>
+                  <td class="muted">261 B</td>
+                  <td><span class="badge">2</span></td>
+                </tr>
+                <tr>
+                  <td class="gold mono">334</td>
+                  <td class="gold mono">0000003de60e6fe8589197d866ff9bb2…</td>
+                  <td class="muted">2026-04-25 18:34:24 UTC</td>
+                  <td>1</td>
+                  <td class="gold mono">50.00000000 LBTC</td>
+                  <td class="muted">261 B</td>
+                  <td><span class="badge">3</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-copy">
+                <h3>Network summary</h3>
+                <p>High-level chain and node facts from the current RPC endpoint.</p>
+              </div>
+            </div>
+            <div class="stack-card">
+              <div class="stack-row"><div class="stack-key">Consensus</div><div class="stack-val">Yespower 1.0</div></div>
+              <div class="stack-row"><div class="stack-key">Retarget</div><div class="stack-val">Dark Gravity Wave v3</div></div>
+              <div class="stack-row"><div class="stack-key">Emission</div><div class="stack-val">50 LBTC base reward</div></div>
+              <div class="stack-row"><div class="stack-key">Node version</div><div class="stack-val">10000</div></div>
+              <div class="stack-row"><div class="stack-key">Mining</div><div class="stack-val">Enabled</div></div>
+              <div class="stack-row"><div class="stack-key">Explorer mode</div><div class="stack-val">RPC direct</div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-copy">
+                <h3>Search tips</h3>
+                <p>The current explorer resolves block heights and full block hashes.</p>
+              </div>
+            </div>
+            <div class="stack-card">
+              <div class="stack-row"><div class="stack-key">By height</div><div class="stack-val">Search <span class="gold mono">336</span> to open the latest block.</div></div>
+              <div class="stack-row"><div class="stack-key">By hash</div><div class="stack-val">Paste a 64-character block hash into the search bar.</div></div>
+              <div class="stack-row"><div class="stack-key">Next stage</div><div class="stack-val">Address and transaction pages can be added later without changing the visual system.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-card"><span>LegacyCoin (LBTC)</span> public explorer · one CPU, one vote</div>
+    </main>
+  </div>
+</body>
+</html>
