@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -162,22 +162,22 @@
       </nav>
       <div class="api-pill" id="apiPill">
         <span class="api-dot"></span>
-        <span id="apiPillText">Waiting for explorer API</span>
+        <span id="apiPillText">Waiting for LBTC REST API</span>
       </div>
     </header>
 
     <main class="page">
       <div class="notice" id="noticeBox">
-        Live data requires a reachable Explorer API. On GitHub Pages, this page stays static unless you point it at a public HTTPS backend. Current target: <code id="apiBaseText">/api/overview</code>.
+        Live data requires a reachable LBTC REST API. On GitHub Pages, this page stays static unless you point it at a public HTTPS backend. Current target: <code id="apiBaseText">/v1/info/network</code>.
       </div>
 
       <section class="hero">
         <div class="hero-card">
           <div class="eyebrow">Live chain intelligence</div>
           <h1>LegacyCoin Explorer</h1>
-          <p>Track the LBTC network with a cleaner public view of chain height, block flow, mining activity, confirmations, and on-chain history. This page is ready to read live explorer data once the backend is reachable over HTTPS.</p>
+          <p>Track the LBTC network with a cleaner public view of chain height, block flow, confirmations, supply posture, and public API transparency. This page now reads from the dedicated LBTC REST API over HTTPS.</p>
           <div class="hero-actions">
-            <a class="hero-btn primary" id="openExplorerBtn" href="#">Open full explorer</a>
+            <a class="hero-btn primary" id="openExplorerBtn" href="#">Open API docs</a>
             <a class="hero-btn secondary" id="refreshBtn" href="#">Refresh data</a>
           </div>
         </div>
@@ -185,7 +185,7 @@
           <div class="mini-card">
             <div class="mini-label">Tip hash</div>
             <div class="mini-value" id="tipHash">Waiting for backend</div>
-            <div class="mini-copy" id="tipCopy">Once the API is reachable, the latest block hash, timestamp, and reward will appear here.</div>
+            <div class="mini-copy" id="tipCopy">Once the REST API is reachable, the latest block hash and chain summary will appear here.</div>
           </div>
           <div class="mini-grid">
             <div class="mini-card">
@@ -203,12 +203,12 @@
       </section>
 
       <section class="stats-grid">
-        <div class="stat"><div class="stat-label">Status</div><div class="stat-value status-offline" id="statusValue">API offline</div><div class="stat-sub" id="statusSub">No live backend data is available from this page yet.</div></div>
+        <div class="stat"><div class="stat-label">Status</div><div class="stat-value status-offline" id="statusValue">API offline</div><div class="stat-sub" id="statusSub">No live REST API data is available from this page yet.</div></div>
         <div class="stat"><div class="stat-label">Chain height</div><div class="stat-value" id="blocksValue">--</div><div class="stat-sub">Current best block known to the connected node.</div></div>
         <div class="stat"><div class="stat-label">Difficulty</div><div class="stat-value" id="difficultyValue">--</div><div class="stat-sub">Dynamic per-block retargeting under DGW3.</div></div>
         <div class="stat"><div class="stat-label">Peers</div><div class="stat-value" id="peersValue">--</div><div class="stat-sub">Active node connections visible to the explorer backend.</div></div>
-        <div class="stat"><div class="stat-label">Hashrate</div><div class="stat-value" id="hashrateValue">--</div><div class="stat-sub">Live node-reported hashrate sample.</div></div>
-        <div class="stat"><div class="stat-label">Mempool</div><div class="stat-value" id="mempoolValue">--</div><div class="stat-sub">Pending transactions waiting for inclusion in a block.</div></div>
+        <div class="stat"><div class="stat-label">Hashrate</div><div class="stat-value" id="hashrateValue">API-first</div><div class="stat-sub">Reserved for the next REST metrics expansion.</div></div>
+        <div class="stat"><div class="stat-label">Mempool</div><div class="stat-value" id="mempoolValue">API-first</div><div class="stat-sub">Reserved for future public mempool endpoints.</div></div>
       </section>
 
       <section class="section-grid">
@@ -237,16 +237,16 @@
             <div class="panel-head">
               <div class="panel-copy">
                 <h3>Network summary</h3>
-                <p>High-level chain and node facts from the current explorer backend.</p>
+              <p>High-level chain and node facts from the current LBTC REST API.</p>
               </div>
             </div>
             <div class="stack-card">
               <div class="stack-row"><div class="stack-key">Consensus</div><div class="stack-val" id="summaryConsensus">Yespower 1.0</div></div>
               <div class="stack-row"><div class="stack-key">Retarget</div><div class="stack-val" id="summaryRetarget">Dark Gravity Wave v3</div></div>
               <div class="stack-row"><div class="stack-key">Supply cap</div><div class="stack-val" id="summarySupply">21M</div></div>
-              <div class="stack-row"><div class="stack-key">Node version</div><div class="stack-val" id="summaryVersion">--</div></div>
-              <div class="stack-row"><div class="stack-key">Mining</div><div class="stack-val" id="summaryMining">--</div></div>
-              <div class="stack-row"><div class="stack-key">API base</div><div class="stack-val" id="summaryApiBase">/api/overview</div></div>
+              <div class="stack-row"><div class="stack-key">Node version</div><div class="stack-val" id="summaryVersion">Next API pass</div></div>
+              <div class="stack-row"><div class="stack-key">Mining</div><div class="stack-val" id="summaryMining">Next API pass</div></div>
+              <div class="stack-row"><div class="stack-key">API base</div><div class="stack-val" id="summaryApiBase">/v1/info/network</div></div>
             </div>
           </div>
 
@@ -254,29 +254,31 @@
             <div class="panel-head">
               <div class="panel-copy">
                 <h3>Backend notes</h3>
-                <p>This Pages site can mirror live explorer data only when the backend is reachable from the browser.</p>
+                <p>This Pages site mirrors live chain data only when the public LBTC REST API is reachable from the browser.</p>
               </div>
             </div>
             <div class="stack-card">
               <div class="stack-row"><div class="stack-key">GitHub Pages</div><div class="stack-val">Static, HTTPS-only frontend.</div></div>
-              <div class="stack-row"><div class="stack-key">Explorer backend</div><div class="stack-val">Should be public over HTTPS for live browser fetches.</div></div>
-              <div class="stack-row"><div class="stack-key">Current server</div><div class="stack-val">Debian host running the full Go explorer.</div></div>
+              <div class="stack-row"><div class="stack-key">REST backend</div><div class="stack-val">Should be public over HTTPS for live browser fetches.</div></div>
+              <div class="stack-row"><div class="stack-key">Current server</div><div class="stack-val">Debian host running the LBTC REST API service.</div></div>
             </div>
           </div>
         </div>
       </section>
 
-      <div class="footer-card"><span>LegacyCoin (LBTC)</span> public explorer landing page · one CPU, one vote</div>
+      <div class="footer-card"><span>LegacyCoin (LBTC)</span> public explorer landing page В· one CPU, one vote</div>
     </main>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const explicitApi = params.get("api");
-    const fallbackApi = "https://sizes-farmer-internship-pictures.trycloudflare.com";
+    const fallbackApi = "https://pursuant-stripes-headphones-separately.trycloudflare.com";
     const apiBase = explicitApi || fallbackApi;
-    const overviewUrl = apiBase ? apiBase.replace(/\/$/, "") + "/api/overview" : "";
-    const explorerHomeUrl = apiBase || "#";
+    const networkUrl = apiBase ? apiBase.replace(/\/$/, "") + "/v1/info/network" : "";
+    const healthUrl = apiBase ? apiBase.replace(/\/$/, "") + "/health" : "";
+    const blocksUrl = apiBase ? apiBase.replace(/\/$/, "") + "/v1/blocks?limit=10&offset=0" : "";
+    const docsUrl = apiBase ? apiBase.replace(/\/$/, "") + "/docs" : "#";
 
     const noticeBox = document.getElementById("noticeBox");
     const apiBaseText = document.getElementById("apiBaseText");
@@ -305,13 +307,13 @@
 
     for (const id of ["openExplorerBtn", "openExplorerNav", "openExplorerTableLink"]) {
       const el = document.getElementById(id);
-      if (el && explorerHomeUrl !== "#") {
-        el.href = explorerHomeUrl;
+      if (el && docsUrl !== "#") {
+        el.href = docsUrl;
       }
     }
 
-    apiBaseText.textContent = overviewUrl || "No API configured";
-    summaryApiBase.textContent = overviewUrl || "No API configured";
+    apiBaseText.textContent = networkUrl || "No API configured";
+    summaryApiBase.textContent = networkUrl || "No API configured";
 
     function truncateHash(hash) {
       return hash.length > 32 ? hash.slice(0, 32) + "..." : hash;
@@ -327,8 +329,8 @@
           <td class="gold mono">${block.height}</td>
           <td class="gold mono">${truncateHash(block.hash)}</td>
           <td class="muted">${new Date(block.time * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC")}</td>
-          <td>${block.tx.length}</td>
-          <td class="gold mono">50.00000000 LBTC</td>
+          <td>${block.transactionCount ?? (Array.isArray(block.transactions) ? block.transactions.length : 0)}</td>
+          <td class="gold mono">${block.rewardLbtc ?? "n/a"}</td>
           <td class="muted">${block.size} B</td>
           <td><span class="badge">${block.confirmations}</span></td>
         </tr>
@@ -336,47 +338,55 @@
     }
 
     async function loadOverview() {
-      if (!overviewUrl) {
-        noticeBox.textContent = "Live data is not configured yet. Add ?api=https://your-public-explorer.example to the URL once the backend is publicly reachable over HTTPS.";
+      if (!networkUrl || !healthUrl || !blocksUrl) {
+        noticeBox.textContent = "Live data is not configured yet. Add ?api=https://your-public-api.example to the URL once the backend is publicly reachable over HTTPS.";
         return;
       }
 
       try {
-        const res = await fetch(overviewUrl, { cache: "no-store" });
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
+        const [healthRes, networkRes, blocksRes] = await Promise.all([
+          fetch(healthUrl, { cache: "no-store" }),
+          fetch(networkUrl, { cache: "no-store" }),
+          fetch(blocksUrl, { cache: "no-store" })
+        ]);
+        if (!healthRes.ok || !networkRes.ok || !blocksRes.ok) {
+          throw new Error("HTTP failure");
         }
-        const data = await res.json();
+
+        const health = await healthRes.json();
+        const network = await networkRes.json();
+        const blocks = await blocksRes.json();
+
         apiPill.classList.add("online");
-        apiPillText.textContent = "Explorer API online";
-        noticeBox.textContent = "Live backend connected successfully. This page is now reading real LegacyCoin explorer data.";
+        apiPillText.textContent = "LBTC REST API online";
+        noticeBox.textContent = "Live backend connected successfully. This page is now reading real LegacyCoin REST API data.";
         statusValue.textContent = "API online";
         statusValue.className = "stat-value status-live";
-        statusSub.textContent = "Explorer API responded successfully.";
+        statusSub.textContent = "REST API responded successfully.";
 
-        blocksValue.textContent = data.stats.blocks;
-        difficultyValue.textContent = Number(data.stats.difficulty).toFixed(9);
-        peersValue.textContent = data.stats.connections;
-        hashrateValue.textContent = data.stats.hashrateText;
-        mempoolValue.textContent = data.stats.pooledTx;
-        summaryVersion.textContent = data.stats.nodeVersion;
-        summaryMining.textContent = data.stats.mining ? "Enabled" : "Disabled";
-        summaryConsensus.textContent = data.network.consensus;
-        summaryRetarget.textContent = data.network.retarget;
-        summarySupply.textContent = data.network.supplyCap;
-        consensusValue.textContent = data.network.ticker;
-        consensusCopy.textContent = data.network.consensus + " with " + data.network.retarget + ".";
+        blocksValue.textContent = network.bestHeight ?? health.bestHeight ?? "--";
+        difficultyValue.textContent = Number(network.difficulty ?? 0).toFixed(9);
+        peersValue.textContent = network.connections ?? "--";
+        hashrateValue.textContent = "Next pass";
+        mempoolValue.textContent = "Next pass";
+        summaryVersion.textContent = "Node info soon";
+        summaryMining.textContent = "Metrics soon";
+        summaryConsensus.textContent = network.consensus ?? "Yespower 1.0";
+        summaryRetarget.textContent = network.retarget ?? "Dark Gravity Wave v3";
+        summarySupply.textContent = network.supplyCapLbtc ?? "21000000.00000000";
+        consensusValue.textContent = network.ticker ?? "LBTC";
+        consensusCopy.textContent = (network.consensus ?? "Yespower 1.0") + " with " + (network.retarget ?? "Dark Gravity Wave v3") + ".";
 
-        if (data.tip) {
-          tipHash.textContent = truncateHash(data.tip.hash);
-          tipCopy.textContent = "Tip #" + data.tip.height + " • " + data.tip.time + " • " + data.tip.reward;
+        if (Array.isArray(blocks) && blocks.length) {
+          tipHash.textContent = truncateHash(blocks[0].hash);
+          tipCopy.textContent = "Tip #" + blocks[0].height + " • " + new Date(blocks[0].time * 1000).toISOString().replace("T", " " ).replace(".000Z", " UTC") + " • " + (blocks[0].rewardLbtc ?? "n/a");
         }
 
-        renderBlocks(data.blocks);
+        renderBlocks(blocks);
       } catch (err) {
         apiPill.classList.remove("online");
-        apiPillText.textContent = "Explorer API offline";
-        noticeBox.textContent = "Could not load live explorer data from " + overviewUrl + ". If this page is on GitHub Pages, the backend must be public and HTTPS-accessible for fetches to work.";
+        apiPillText.textContent = "LBTC REST API offline";
+        noticeBox.textContent = "Could not load live chain data from " + networkUrl + ". If this page is on GitHub Pages, the backend must be public and HTTPS-accessible for fetches to work.";
       }
     }
 
@@ -389,3 +399,5 @@
   </script>
 </body>
 </html>
+
+

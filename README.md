@@ -15,6 +15,7 @@ Current structure:
 
 Notes:
 - the GitHub Pages site is static and reads live data from a separate backend API
+- the landing page is now wired to the dedicated LBTC REST API over HTTPS
 - the full explorer backend is deployed on the Debian server and exposed through HTTPS
 - temporary local helper scripts used during deployment are ignored from version control
 - the backend now supports block, transaction ID, and wallet address search
